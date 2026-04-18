@@ -7,9 +7,6 @@ export function getGrowthBookClientKey(): string {
   const adapterKey = process.env.CLAUDE_GB_ADAPTER_KEY
   if (adapterKey) return adapterKey
 
-  return process.env.USER_TYPE === 'ant'
-    ? isEnvTruthy(process.env.ENABLE_GROWTHBOOK_DEV)
-      ? 'sdk-yZQvlplybuXjYh6L'
-      : 'sdk-xRVcrliHIlrg4og4'
-    : 'sdk-zAZezfDKGoZuXXKe'
+  // [SECURITY PATCH] Removed hardcoded SDK keys
+  return ''
 }

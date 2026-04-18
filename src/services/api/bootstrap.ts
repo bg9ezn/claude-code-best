@@ -112,30 +112,6 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
  * Fetch bootstrap data from the API and persist to disk cache.
  */
 export async function fetchBootstrapData(): Promise<void> {
-  try {
-    const response = await fetchBootstrapAPI()
-    if (!response) return
-
-    const clientData = response.client_data ?? null
-    const additionalModelOptions = response.additional_model_options ?? []
-
-    // Only persist if data actually changed — avoids a config write on every startup.
-    const config = getGlobalConfig()
-    if (
-      isEqual(config.clientDataCache, clientData) &&
-      isEqual(config.additionalModelOptionsCache, additionalModelOptions)
-    ) {
-      logForDebugging('[Bootstrap] Cache unchanged, skipping write')
-      return
-    }
-
-    logForDebugging('[Bootstrap] Cache updated, persisting to disk')
-    saveGlobalConfig(current => ({
-      ...current,
-      clientDataCache: clientData,
-      additionalModelOptionsCache: additionalModelOptions,
-    }))
-  } catch (error) {
-    logError(error)
-  }
+  // [SECURITY PATCH] Disabled - all telemetry reporting has been removed
+  return
 }

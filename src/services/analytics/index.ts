@@ -125,42 +125,25 @@ export function attachAnalyticsSink(newSink: AnalyticsSink): void {
 /**
  * Log an event to analytics backends (synchronous)
  *
- * Events may be sampled based on the 'tengu_event_sampling_config' dynamic config.
- * When sampled, the sample_rate is added to the event metadata.
- *
- * If no sink is attached, events are queued and drained when the sink attaches.
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export function logEvent(
-  eventName: string,
-  // intentionally no strings unless AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-  // to avoid accidentally logging code/filepaths
-  metadata: LogEventMetadata,
+  _eventName: string,
+  _metadata: LogEventMetadata,
 ): void {
-  if (sink === null) {
-    eventQueue.push({ eventName, metadata, async: false })
-    return
-  }
-  sink.logEvent(eventName, metadata)
+  return
 }
 
 /**
  * Log an event to analytics backends (asynchronous)
  *
- * Events may be sampled based on the 'tengu_event_sampling_config' dynamic config.
- * When sampled, the sample_rate is added to the event metadata.
- *
- * If no sink is attached, events are queued and drained when the sink attaches.
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export async function logEventAsync(
-  eventName: string,
-  // intentionally no strings, to avoid accidentally logging code/filepaths
-  metadata: LogEventMetadata,
+  _eventName: string,
+  _metadata: LogEventMetadata,
 ): Promise<void> {
-  if (sink === null) {
-    eventQueue.push({ eventName, metadata, async: true })
-    return
-  }
-  await sink.logEventAsync(eventName, metadata)
+  return
 }
 
 /**

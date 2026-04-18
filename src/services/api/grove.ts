@@ -43,108 +43,33 @@ export type ApiResult<T> = { success: true; data: T } | { success: false }
 
 /**
  * Get the current Grove settings for the user account.
- * Returns ApiResult to distinguish between API failure and success.
- * Uses existing OAuth 401 retry, then returns failure if that doesn't help.
  *
- * Memoized for the session to avoid redundant per-render requests.
- * Cache is invalidated in updateGroveSettings() so post-toggle reads are fresh.
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export const getGroveSettings = memoize(
   async (): Promise<ApiResult<AccountSettings>> => {
-    // Grove is a notification feature; during an outage, skipping it is correct.
-    if (isEssentialTrafficOnly()) {
-      return { success: false }
-    }
-    try {
-      const response = await withOAuth401Retry(() => {
-        const authHeaders = getAuthHeaders()
-        if (authHeaders.error) {
-          throw new Error(`Failed to get auth headers: ${authHeaders.error}`)
-        }
-        return axios.get<AccountSettings>(
-          `${getOauthConfig().BASE_API_URL}/api/oauth/account/settings`,
-          {
-            headers: {
-              ...authHeaders.headers,
-              'User-Agent': getClaudeCodeUserAgent(),
-            },
-          },
-        )
-      })
-      return { success: true, data: response.data }
-    } catch (err) {
-      logError(err)
-      // Don't cache failures — transient network issues would lock the user
-      // out of privacy settings for the entire session (deadlock: dialog needs
-      // success to render the toggle, toggle calls updateGroveSettings which
-      // is the only other place the cache is cleared).
-      getGroveSettings.cache.clear?.()
-      return { success: false }
-    }
+    return { success: false }
   },
 )
 
 /**
  * Mark that the Grove notice has been viewed by the user
+ *
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export async function markGroveNoticeViewed(): Promise<void> {
-  try {
-    await withOAuth401Retry(() => {
-      const authHeaders = getAuthHeaders()
-      if (authHeaders.error) {
-        throw new Error(`Failed to get auth headers: ${authHeaders.error}`)
-      }
-      return axios.post(
-        `${getOauthConfig().BASE_API_URL}/api/oauth/account/grove_notice_viewed`,
-        {},
-        {
-          headers: {
-            ...authHeaders.headers,
-            'User-Agent': getClaudeCodeUserAgent(),
-          },
-        },
-      )
-    })
-    // This mutates grove_notice_viewed_at server-side — Grove.tsx:87 reads it
-    // to decide whether to show the dialog. Without invalidation a same-session
-    // remount would read stale viewed_at:null and re-show the dialog.
-    getGroveSettings.cache.clear?.()
-  } catch (err) {
-    logError(err)
-  }
+  return
 }
 
 /**
  * Update Grove settings for the user account
+ *
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export async function updateGroveSettings(
-  groveEnabled: boolean,
+  _groveEnabled: boolean,
 ): Promise<void> {
-  try {
-    await withOAuth401Retry(() => {
-      const authHeaders = getAuthHeaders()
-      if (authHeaders.error) {
-        throw new Error(`Failed to get auth headers: ${authHeaders.error}`)
-      }
-      return axios.patch(
-        `${getOauthConfig().BASE_API_URL}/api/oauth/account/settings`,
-        {
-          grove_enabled: groveEnabled,
-        },
-        {
-          headers: {
-            ...authHeaders.headers,
-            'User-Agent': getClaudeCodeUserAgent(),
-          },
-        },
-      )
-    })
-    // Invalidate memoized settings so the post-toggle confirmation
-    // read in privacy-settings.tsx picks up the new value.
-    getGroveSettings.cache.clear?.()
-  } catch (err) {
-    logError(err)
-  }
+  return
 }
 
 /**

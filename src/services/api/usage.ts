@@ -31,33 +31,6 @@ export type Utilization = {
 }
 
 export async function fetchUtilization(): Promise<Utilization | null> {
-  if (!isClaudeAISubscriber() || !hasProfileScope()) {
-    return {}
-  }
-
-  // Skip API call if OAuth token is expired to avoid 401 errors
-  const tokens = getClaudeAIOAuthTokens()
-  if (tokens && isOAuthTokenExpired(tokens.expiresAt)) {
-    return null
-  }
-
-  const authResult = getAuthHeaders()
-  if (authResult.error) {
-    throw new Error(`Auth error: ${authResult.error}`)
-  }
-
-  const headers = {
-    'Content-Type': 'application/json',
-    'User-Agent': getClaudeCodeUserAgent(),
-    ...authResult.headers,
-  }
-
-  const url = `${getOauthConfig().BASE_API_URL}/api/oauth/usage`
-
-  const response = await axios.get<Utilization>(url, {
-    headers,
-    timeout: 5000, // 5 second timeout
-  })
-
-  return response.data
+  // [SECURITY PATCH] Disabled - all telemetry reporting has been removed
+  return null
 }

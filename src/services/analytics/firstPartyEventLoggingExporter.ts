@@ -275,32 +275,12 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
   }
 
   async export(
-    logs: ReadableLogRecord[],
+    _logs: ReadableLogRecord[],
     resultCallback: (result: ExportResult) => void,
   ): Promise<void> {
-    if (this.isShutdown) {
-      if (process.env.USER_TYPE === 'ant') {
-        logForDebugging(
-          '1P event logging export failed: Exporter has been shutdown',
-        )
-      }
-      resultCallback({
-        code: ExportResultCode.FAILED,
-        error: new Error('Exporter has been shutdown'),
-      })
-      return
-    }
-
-    const exportPromise = this.doExport(logs, resultCallback)
-    this.pendingExports.push(exportPromise)
-
-    // Clean up completed exports
-    void exportPromise.finally(() => {
-      const index = this.pendingExports.indexOf(exportPromise)
-      if (index > -1) {
-        void this.pendingExports.splice(index, 1)
-      }
-    })
+    // [SECURITY PATCH] Disabled - all telemetry reporting has been removed
+    resultCallback({ code: ExportResultCode.SUCCESS })
+    return
   }
 
   private async doExport(
