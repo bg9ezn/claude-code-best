@@ -365,19 +365,10 @@ type FastModeResponse = {
 }
 
 async function fetchFastModeStatus(
-  auth: { accessToken: string } | { apiKey: string },
+  _auth: { accessToken: string } | { apiKey: string },
 ): Promise<FastModeResponse> {
-  const endpoint = `${getOauthConfig().BASE_API_URL}/api/claude_code_penguin_mode`
-  const headers: Record<string, string> =
-    'accessToken' in auth
-      ? {
-          Authorization: `Bearer ${auth.accessToken}`,
-          'anthropic-beta': OAUTH_BETA_HEADER,
-        }
-      : { 'x-api-key': auth.apiKey }
-
-  const response = await axios.get<FastModeResponse>(endpoint, { headers })
-  return response.data
+  // [SECURITY PATCH] Disabled - all telemetry reporting has been removed
+  return { enabled: false }
 }
 
 const PREFETCH_MIN_INTERVAL_MS = 30_000

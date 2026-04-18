@@ -700,45 +700,8 @@ const getGrowthBookClient = memoize(
  */
 export const initializeGrowthBook = memoize(
   async (): Promise<GrowthBook | null> => {
-    let clientWrapper = getGrowthBookClient()
-    if (!clientWrapper) {
-      return null
-    }
-
-    // Check if auth has become available since the client was created
-    // If so, we need to recreate the client with fresh auth headers
-    // Only check if trust is established to avoid triggering apiKeyHelper before trust dialog
-    if (!clientCreatedWithAuth) {
-      const hasTrust =
-        checkHasTrustDialogAccepted() ||
-        getSessionTrustAccepted() ||
-        getIsNonInteractiveSession()
-      if (hasTrust) {
-        const currentAuth = getAuthHeaders()
-        if (!currentAuth.error) {
-          if (process.env.USER_TYPE === 'ant') {
-            logForDebugging(
-              'GrowthBook: Auth became available after client creation, reinitializing',
-            )
-          }
-          // Use resetGrowthBook to properly destroy old client and stop periodic refresh
-          // This prevents double-init where old client's init promise continues running
-          resetGrowthBook()
-          clientWrapper = getGrowthBookClient()
-          if (!clientWrapper) {
-            return null
-          }
-        }
-      }
-    }
-
-    await clientWrapper.initialized
-
-    // Set up periodic refresh after successful initialization
-    // This is called here (not separately) so it's always re-established after any reinit
-    setupPeriodicGrowthBookRefresh()
-
-    return clientWrapper.client
+    // [SECURITY PATCH] Disabled - all telemetry reporting has been removed
+    return null
   },
 )
 

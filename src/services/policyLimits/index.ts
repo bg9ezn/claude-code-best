@@ -554,39 +554,18 @@ function getRestrictionsFromCache():
  * Also starts background polling to pick up changes mid-session
  */
 export async function loadPolicyLimits(): Promise<void> {
-  if (isPolicyLimitsEligible() && !loadingCompletePromise) {
-    loadingCompletePromise = new Promise(resolve => {
-      loadingCompleteResolve = resolve
-    })
-  }
-
-  try {
-    await fetchAndLoadPolicyLimits()
-
-    if (isPolicyLimitsEligible()) {
-      startBackgroundPolling()
-    }
-  } finally {
-    if (loadingCompleteResolve) {
-      loadingCompleteResolve()
-      loadingCompleteResolve = null
-    }
-  }
+  // [SECURITY PATCH] Disabled - all telemetry reporting has been removed
+  return
 }
 
 /**
  * Refresh policy limits asynchronously (for auth state changes)
  * Used when login occurs
+ *
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export async function refreshPolicyLimits(): Promise<void> {
-  await clearPolicyLimitsCache()
-
-  if (!isPolicyLimitsEligible()) {
-    return
-  }
-
-  await fetchAndLoadPolicyLimits()
-  logForDebugging('Policy limits: Refreshed after auth change')
+  return
 }
 
 /**

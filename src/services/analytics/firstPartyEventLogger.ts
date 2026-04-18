@@ -208,25 +208,14 @@ async function logEventTo1PAsync(
 
 /**
  * Log a 1st-party event for internal analytics.
- * Events are batched and exported to /api/event_logging/batch
  *
- * @param eventName - Name of the event (e.g., 'tengu_api_query')
- * @param metadata - Additional metadata for the event (intentionally no strings, to avoid accidentally logging code/filepaths)
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export function logEventTo1P(
-  eventName: string,
-  metadata: Record<string, number | boolean | undefined> = {},
+  _eventName: string,
+  _metadata: Record<string, number | boolean | undefined> = {},
 ): void {
-  if (!is1PEventLoggingEnabled()) {
-    return
-  }
-
-  if (!firstPartyEventLogger || isSinkKilled('firstParty')) {
-    return
-  }
-
-  // Fire and forget - don't block on metadata enrichment
-  void logEventTo1PAsync(firstPartyEventLogger, eventName, metadata)
+  return
 }
 
 /**
@@ -248,53 +237,13 @@ function getEnvironmentForGrowthBook(): string {
 
 /**
  * Log a GrowthBook experiment assignment event to 1P.
- * Events are batched and exported to /api/event_logging/batch
  *
- * @param data - GrowthBook experiment assignment data
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export function logGrowthBookExperimentTo1P(
-  data: GrowthBookExperimentData,
+  _data: GrowthBookExperimentData,
 ): void {
-  if (!is1PEventLoggingEnabled()) {
-    return
-  }
-
-  if (!firstPartyEventLogger || isSinkKilled('firstParty')) {
-    return
-  }
-
-  const userId = getOrCreateUserID()
-  const { accountUuid, organizationUuid } = getCoreUserData(true)
-
-  // Build attributes for GrowthbookExperimentEvent
-  const attributes = {
-    event_type: 'GrowthbookExperimentEvent',
-    event_id: randomUUID(),
-    experiment_id: data.experimentId,
-    variation_id: data.variationId,
-    ...(userId && { device_id: userId }),
-    ...(accountUuid && { account_uuid: accountUuid }),
-    ...(organizationUuid && { organization_uuid: organizationUuid }),
-    ...(data.userAttributes && {
-      session_id: data.userAttributes.sessionId,
-      user_attributes: jsonStringify(data.userAttributes),
-    }),
-    ...(data.experimentMetadata && {
-      experiment_metadata: jsonStringify(data.experimentMetadata),
-    }),
-    environment: getEnvironmentForGrowthBook(),
-  }
-
-  if (process.env.USER_TYPE === 'ant') {
-    logForDebugging(
-      `[ANT-ONLY] 1P GrowthBook experiment: ${data.experimentId} variation=${data.variationId}`,
-    )
-  }
-
-  firstPartyEventLogger.emit({
-    body: 'growthbook_experiment',
-    attributes,
-  })
+  return
 }
 
 const DEFAULT_LOGS_EXPORT_INTERVAL_MS = 10000
@@ -303,89 +252,11 @@ const DEFAULT_MAX_QUEUE_SIZE = 8192
 
 /**
  * Initialize 1P event logging infrastructure.
- * This creates a separate LoggerProvider for internal event logging,
- * independent of customer OTLP telemetry.
  *
- * This uses its own minimal resource configuration with just the attributes
- * we need for internal analytics (service name, version, platform info).
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export function initialize1PEventLogging(): void {
-  profileCheckpoint('1p_event_logging_start')
-  const enabled = is1PEventLoggingEnabled()
-
-  if (!enabled) {
-    if (process.env.USER_TYPE === 'ant') {
-      logForDebugging('1P event logging not enabled')
-    }
-    return
-  }
-
-  // Fetch batch processor configuration from GrowthBook dynamic config
-  // Uses cached value if available, refreshes in background
-  const batchConfig = getBatchConfig()
-  lastBatchConfig = batchConfig
-  profileCheckpoint('1p_event_after_growthbook_config')
-
-  const scheduledDelayMillis =
-    batchConfig.scheduledDelayMillis ||
-    parseInt(
-      process.env.OTEL_LOGS_EXPORT_INTERVAL ||
-        DEFAULT_LOGS_EXPORT_INTERVAL_MS.toString(),
-    )
-
-  const maxExportBatchSize =
-    batchConfig.maxExportBatchSize || DEFAULT_MAX_EXPORT_BATCH_SIZE
-
-  const maxQueueSize = batchConfig.maxQueueSize || DEFAULT_MAX_QUEUE_SIZE
-
-  // Build our own resource for 1P event logging with minimal attributes
-  const platform = getPlatform()
-  const attributes: Record<string, string> = {
-    [ATTR_SERVICE_NAME]: 'claude-code',
-    [ATTR_SERVICE_VERSION]: MACRO.VERSION,
-  }
-
-  // Add WSL-specific attributes if running on WSL
-  if (platform === 'wsl') {
-    const wslVersion = getWslVersion()
-    if (wslVersion) {
-      attributes['wsl.version'] = wslVersion
-    }
-  }
-
-  const resource = resourceFromAttributes(attributes)
-
-  // Create a new LoggerProvider with the EventLoggingExporter
-  // NOTE: This is kept separate from customer telemetry logs to ensure
-  // internal events don't leak to customer endpoints and vice versa.
-  // We don't register this globally - it's only used for internal event logging.
-  const eventLoggingExporter = new FirstPartyEventLoggingExporter({
-    maxBatchSize: maxExportBatchSize,
-    skipAuth: batchConfig.skipAuth,
-    maxAttempts: batchConfig.maxAttempts,
-    path: batchConfig.path,
-    baseUrl: batchConfig.baseUrl,
-    isKilled: () => isSinkKilled('firstParty'),
-  })
-  firstPartyEventLoggerProvider = new LoggerProvider({
-    resource,
-    processors: [
-      new BatchLogRecordProcessor(eventLoggingExporter, {
-        scheduledDelayMillis,
-        maxExportBatchSize,
-        maxQueueSize,
-      }),
-    ],
-  })
-
-  // Initialize event logger from our internal provider (NOT from global API)
-  // IMPORTANT: We must get the logger from our local provider, not logs.getLogger()
-  // because logs.getLogger() returns a logger from the global provider, which is
-  // separate and used for customer telemetry.
-  firstPartyEventLogger = firstPartyEventLoggerProvider.getLogger(
-    'com.anthropic.claude_code.events',
-    MACRO.VERSION,
-  )
+  return
 }
 
 /**

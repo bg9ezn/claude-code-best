@@ -88,27 +88,17 @@ function logEventAsyncImpl(
 /**
  * Initialize analytics gates during startup.
  *
- * Updates gate values from server. Early events use cached values from previous
- * session to avoid data loss during initialization.
- *
- * Called from main.tsx during setupBackend().
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export function initializeAnalyticsGates(): void {
-  isDatadogGateEnabled =
-    checkStatsigFeatureGate_CACHED_MAY_BE_STALE(DATADOG_GATE_NAME)
+  return
 }
 
 /**
  * Initialize the analytics sink.
  *
- * Call this during app startup to attach the analytics backend.
- * Any events logged before this is called will be queued and drained.
- *
- * Idempotent: safe to call multiple times (subsequent calls are no-ops).
+ * [SECURITY PATCH] Disabled - all telemetry reporting has been removed
  */
 export function initializeAnalyticsSink(): void {
-  attachAnalyticsSink({
-    logEvent: logEventImpl,
-    logEventAsync: logEventAsyncImpl,
-  })
+  return
 }

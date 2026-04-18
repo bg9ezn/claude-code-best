@@ -109,52 +109,16 @@ function buildTranscript(messages: Message[]): string {
 // ─── API call ───────────────────────────────────────
 
 async function callBuddyReactAPI(
-  companion: {
+  _companion: {
     name: string
     personality: string
     species: string
     rarity: string
     stats: Record<string, number>
   },
-  transcript: string,
-  addressed: boolean,
+  _transcript: string,
+  _addressed: boolean,
 ): Promise<string | null> {
-  const tokens = getClaudeAIOAuthTokens()
-  if (!tokens?.accessToken) return null
-
-  const orgId = getGlobalConfig().oauthAccount?.organizationUuid
-  if (!orgId) return null
-
-  const baseUrl = getOauthConfig().BASE_API_URL
-  const url = `${baseUrl}/api/organizations/${orgId}/claude_code/buddy_react`
-
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${tokens.accessToken}`,
-      'Content-Type': 'application/json',
-      'User-Agent': getUserAgent(),
-    },
-    body: JSON.stringify({
-      name: companion.name.slice(0, 32),
-      personality: companion.personality.slice(0, 200),
-      species: companion.species,
-      rarity: companion.rarity,
-      stats: companion.stats,
-      transcript,
-      reason: addressed ? 'addressed' : 'turn',
-      recent: recentReactions.map(r => r.slice(0, 200)),
-      addressed,
-    }),
-    signal: AbortSignal.timeout(10_000),
-  })
-
-  if (!resp.ok) return null
-
-  try {
-    const data = (await resp.json()) as { reaction?: string }
-    return data.reaction?.trim() || null
-  } catch {
-    return null
-  }
+  // [SECURITY PATCH] Disabled - all telemetry reporting has been removed
+  return null
 }
